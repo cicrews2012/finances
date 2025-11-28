@@ -1,1 +1,966 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Lucide icons as SVG components
+        const PlusCircle = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+        );
+
+        const TrendingUp = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+        );
+
+        const TrendingDown = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                <polyline points="17 18 23 18 23 12"></polyline>
+            </svg>
+        );
+
+        const DollarSign = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+        );
+
+        const Calendar = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        );
+
+        const Trash2 = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+        );
+
+        const Edit2 = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
+        );
+
+        const Save = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+        );
+
+        const X = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        );
+
+        const ChevronDown = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        );
+
+        const ChevronUp = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        );
+
+        const Download = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        );
+
+        const Upload = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+        );
+
+        // Storage polyfill for browsers without window.storage
+        if (!window.storage) {
+            window.storage = {
+                async get(key) {
+                    const value = localStorage.getItem(key);
+                    return value ? { key, value } : null;
+                },
+                async set(key, value) {
+                    localStorage.setItem(key, value);
+                    return { key, value };
+                },
+                async delete(key) {
+                    localStorage.removeItem(key);
+                    return { key, deleted: true };
+                }
+            };
+        }
+
+        const FinanceTracker = () => {
+            const [transactions, setTransactions] = useState([]);
+            const [description, setDescription] = useState('');
+            const [amount, setAmount] = useState('');
+            const [category, setCategory] = useState('');
+            const [type, setType] = useState('expense');
+            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+            const [editingId, setEditingId] = useState(null);
+            const [customCategory, setCustomCategory] = useState('');
+            const [showCustomCategory, setShowCustomCategory] = useState(false);
+            const [expandedMonths, setExpandedMonths] = useState({});
+            const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('');
+            const [lastExportDate, setLastExportDate] = useState(null);
+            const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+            const [analysisType, setAnalysisType] = useState('expense');
+
+            const expenseCategories = [
+                'Food', 'Subscriptions', 'Groceries', 'Home', 'Car Payments', 
+                'Personal', 'Pets', 'Utilities', 'Gas (cars)', 'Debt', 
+                'Other', 'Insurance', 'Kids', 'Savings', 'House cleaning'
+            ];
+
+            const incomeCategories = [
+                'Salary', 'Freelance', 'Investment', 'Gift', 'Bonus', 'Other'
+            ];
+
+            useEffect(() => {
+                loadData();
+                loadLastExportDate();
+            }, []);
+
+            const loadData = async () => {
+                try {
+                    const result = await window.storage.get('finance-transactions');
+                    if (result && result.value) {
+                        setTransactions(JSON.parse(result.value));
+                    }
+                } catch (error) {
+                    console.log('No saved data found');
+                }
+            };
+
+            const loadLastExportDate = async () => {
+                try {
+                    const result = await window.storage.get('last-export-date');
+                    if (result && result.value) {
+                        setLastExportDate(result.value);
+                    }
+                } catch (error) {
+                    console.log('No last export date found');
+                }
+            };
+
+            const saveData = async (data) => {
+                try {
+                    await window.storage.set('finance-transactions', JSON.stringify(data));
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                }
+            };
+
+            const getFinancialMonth = (dateStr) => {
+                const date = new Date(dateStr);
+                const day = date.getDate();
+                let month = date.getMonth();
+                let year = date.getFullYear();
+
+                if (day >= 28) {
+                    month += 1;
+                    if (month > 11) {
+                        month = 0;
+                        year += 1;
+                    }
+                }
+
+                return { month, year };
+            };
+
+            const getMonthName = (monthIndex) => {
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+                return months[monthIndex];
+            };
+
+            const addTransaction = () => {
+                if (!description || !amount || !category) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const newTransaction = {
+                    id: editingId || Date.now(),
+                    description,
+                    amount: parseFloat(amount),
+                    category: showCustomCategory ? customCategory : category,
+                    type,
+                    date,
+                    ...getFinancialMonth(date)
+                };
+
+                let updatedTransactions;
+                if (editingId) {
+                    updatedTransactions = transactions.map(t => 
+                        t.id === editingId ? newTransaction : t
+                    );
+                    setEditingId(null);
+                } else {
+                    updatedTransactions = [...transactions, newTransaction];
+                }
+
+                setTransactions(updatedTransactions);
+                saveData(updatedTransactions);
+                resetForm();
+            };
+
+            const deleteTransaction = (id) => {
+                const updatedTransactions = transactions.filter(t => t.id !== id);
+                setTransactions(updatedTransactions);
+                saveData(updatedTransactions);
+            };
+
+            const editTransaction = (transaction) => {
+                setDescription(transaction.description);
+                setAmount(transaction.amount.toString());
+                setCategory(transaction.category);
+                setType(transaction.type);
+                setDate(transaction.date);
+                setEditingId(transaction.id);
+            };
+
+            const resetForm = () => {
+                setDescription('');
+                setAmount('');
+                setCategory('');
+                setCustomCategory('');
+                setShowCustomCategory(false);
+                setDate(new Date().toISOString().split('T')[0]);
+                setEditingId(null);
+            };
+
+            const exportData = () => {
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                const dataStr = JSON.stringify(transactions, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `finance-data-${dateStr}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                const exportTimestamp = today.toISOString();
+                setLastExportDate(exportTimestamp);
+                window.storage.set('last-export-date', exportTimestamp);
+            };
+
+            const importData = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            setTransactions(importedData);
+                            saveData(importedData);
+                            alert('Data imported successfully!');
+                        } else {
+                            alert('Invalid file format');
+                        }
+                    } catch (error) {
+                        alert('Error reading file');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            };
+
+            const getMonthlyData = () => {
+                const monthlyData = {};
+                
+                transactions.forEach(t => {
+                    const key = `${t.year}-${t.month}`;
+                    if (!monthlyData[key]) {
+                        monthlyData[key] = {
+                            income: 0,
+                            expenses: 0,
+                            month: t.month,
+                            year: t.year,
+                            transactions: []
+                        };
+                    }
+                    
+                    if (t.type === 'income') {
+                        monthlyData[key].income += t.amount;
+                    } else {
+                        monthlyData[key].expenses += t.amount;
+                    }
+                    monthlyData[key].transactions.push(t);
+                });
+
+                return Object.values(monthlyData).sort((a, b) => {
+                    if (a.year !== b.year) return a.year - b.year;
+                    return a.month - b.month;
+                });
+            };
+
+            const getYearlyTotal = (year) => {
+                const yearTransactions = transactions.filter(t => t.year === year);
+                const income = yearTransactions.filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                const expenses = yearTransactions.filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                return { income, expenses, net: income - expenses };
+            };
+
+            const getYearlyCategoryBreakdown = (year) => {
+                const yearTransactions = transactions.filter(t => t.year === year && t.type === 'expense');
+                const breakdown = {};
+                yearTransactions.forEach(t => {
+                    if (!breakdown[t.category]) {
+                        breakdown[t.category] = {
+                            total: 0,
+                            transactions: []
+                        };
+                    }
+                    breakdown[t.category].total += t.amount;
+                    breakdown[t.category].transactions.push(t);
+                });
+                return breakdown;
+            };
+
+            const getYearlyIncomeCategoryBreakdown = (year) => {
+                const yearTransactions = transactions.filter(t => t.year === year && t.type === 'income');
+                const breakdown = {};
+                yearTransactions.forEach(t => {
+                    if (!breakdown[t.category]) {
+                        breakdown[t.category] = {
+                            total: 0,
+                            transactions: []
+                        };
+                    }
+                    breakdown[t.category].total += t.amount;
+                    breakdown[t.category].transactions.push(t);
+                });
+                return breakdown;
+            };
+
+            const toggleMonth = (key) => {
+                setExpandedMonths(prev => ({
+                    ...prev,
+                    [key]: !prev[key]
+                }));
+            };
+
+            const getDaysSinceExport = () => {
+                if (!lastExportDate) return null;
+                const lastExport = new Date(lastExportDate);
+                const now = new Date();
+                const diffTime = Math.abs(now - lastExport);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
+            };
+
+            const getExportReminderColor = () => {
+                const days = getDaysSinceExport();
+                if (days === null) return 'bg-yellow-600';
+                if (days === 0) return 'bg-green-600';
+                if (days <= 7) return 'bg-blue-600';
+                if (days <= 30) return 'bg-yellow-600';
+                return 'bg-red-600';
+            };
+
+            const getExportReminderText = () => {
+                const days = getDaysSinceExport();
+                if (days === null) return 'Never exported';
+                if (days === 0) return 'Exported today';
+                if (days === 1) return 'Exported yesterday';
+                return `Exported ${days} days ago`;
+            };
+
+            const monthlyData = getMonthlyData();
+            const currentYear = new Date().getFullYear();
+            const yearlyTotal = getYearlyTotal(selectedYear);
+            const yearlyCategoryBreakdown = getYearlyCategoryBreakdown(selectedYear);
+            const yearlyIncomeCategoryBreakdown = getYearlyIncomeCategoryBreakdown(selectedYear);
+
+            const getAvailableYears = () => {
+                const years = new Set(transactions.map(t => t.year));
+                return Array.from(years).sort((a, b) => b - a);
+            };
+
+            const availableYears = getAvailableYears();
+
+            const getYearComparison = () => {
+                if (availableYears.length < 2) return null;
+                
+                const previousYear = selectedYear - 1;
+                const currentYearData = getYearlyTotal(selectedYear);
+                const previousYearData = getYearlyTotal(previousYear);
+                
+                if (previousYearData.income === 0 && previousYearData.expenses === 0) return null;
+                
+                return {
+                    income: {
+                        current: currentYearData.income,
+                        previous: previousYearData.income,
+                        change: currentYearData.income - previousYearData.income,
+                        percentChange: previousYearData.income !== 0 
+                            ? ((currentYearData.income - previousYearData.income) / previousYearData.income) * 100 
+                            : 0
+                    },
+                    expenses: {
+                        current: currentYearData.expenses,
+                        previous: previousYearData.expenses,
+                        change: currentYearData.expenses - previousYearData.expenses,
+                        percentChange: previousYearData.expenses !== 0 
+                            ? ((currentYearData.expenses - previousYearData.expenses) / previousYearData.expenses) * 100 
+                            : 0
+                    },
+                    net: {
+                        current: currentYearData.net,
+                        previous: previousYearData.net,
+                        change: currentYearData.net - previousYearData.net
+                    }
+                };
+            };
+
+            const yearComparison = getYearComparison();
+            const filteredMonthlyData = monthlyData.filter(m => m.year === selectedYear);
+
+            const getCategoryBreakdown = (monthData) => {
+                const breakdown = {};
+                monthData.transactions
+                    .filter(t => t.type === 'expense')
+                    .forEach(t => {
+                        breakdown[t.category] = (breakdown[t.category] || 0) + t.amount;
+                    });
+                return breakdown;
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-center mb-8">
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-4xl font-bold flex items-center gap-3">
+                                    <DollarSign size={36} className="text-green-400" />
+                                    Personal Finance Tracker
+                                </h1>
+                                
+                                {availableYears.length > 0 && (
+                                    <select
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                        className="px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none text-xl font-semibold"
+                                    >
+                                        {availableYears.map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={exportData}
+                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                                    >
+                                        <Download size={18} /> Export Backup
+                                    </button>
+                                    
+                                    <label className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors flex items-center gap-2 cursor-pointer">
+                                        <Upload size={18} /> Import Backup
+                                        <input
+                                            type="file"
+                                            accept=".json"
+                                            onChange={importData}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                </div>
+                                
+                                <div className={`text-xs px-3 py-1 rounded-full ${getExportReminderColor()} text-white font-medium`}>
+                                    {getExportReminderText()}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Yearly Summary */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="bg-slate-800 rounded-lg p-6 border border-green-500/20">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <TrendingUp size={24} className="text-green-400" />
+                                    <h3 className="text-lg font-semibold">Total Income {selectedYear}</h3>
+                                </div>
+                                <p className="text-3xl font-bold text-green-400">
+                                    ${yearlyTotal.income.toFixed(2)}
+                                </p>
+                                {yearComparison && (
+                                    <p className={`text-sm mt-2 ${yearComparison.income.change >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                                        {yearComparison.income.change >= 0 ? '+' : ''}${yearComparison.income.change.toFixed(2)} 
+                                        ({yearComparison.income.percentChange >= 0 ? '+' : ''}{yearComparison.income.percentChange.toFixed(1)}%) vs {selectedYear - 1}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="bg-slate-800 rounded-lg p-6 border border-red-500/20">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <TrendingDown size={24} className="text-red-400" />
+                                    <h3 className="text-lg font-semibold">Total Expenses {selectedYear}</h3>
+                                </div>
+                                <p className="text-3xl font-bold text-red-400">
+                                    ${yearlyTotal.expenses.toFixed(2)}
+                                </p>
+                                {yearComparison && (
+                                    <p className={`text-sm mt-2 ${yearComparison.expenses.change <= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                                        {yearComparison.expenses.change >= 0 ? '+' : ''}${yearComparison.expenses.change.toFixed(2)} 
+                                        ({yearComparison.expenses.percentChange >= 0 ? '+' : ''}{yearComparison.expenses.percentChange.toFixed(1)}%) vs {selectedYear - 1}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="bg-slate-800 rounded-lg p-6 border border-blue-500/20">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <DollarSign size={24} className="text-blue-400" />
+                                    <h3 className="text-lg font-semibold">Net {selectedYear}</h3>
+                                </div>
+                                <p className={`text-3xl font-bold ${yearlyTotal.net >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                                    ${yearlyTotal.net.toFixed(2)}
+                                </p>
+                                {yearComparison && (
+                                    <p className={`text-sm mt-2 ${yearComparison.net.change >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                                        {yearComparison.net.change >= 0 ? '+' : ''}${yearComparison.net.change.toFixed(2)} vs {selectedYear - 1}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Input Form */}
+                        <div className="bg-slate-800 rounded-lg p-6 mb-8 border border-slate-700">
+                            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                                <PlusCircle size={24} />
+                                {editingId ? 'Edit Transaction' : 'Add Transaction'}
+                            </h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Type</label>
+                                    <select
+                                        value={type}
+                                        onChange={(e) => {
+                                            setType(e.target.value);
+                                            setCategory('');
+                                            setShowCustomCategory(false);
+                                        }}
+                                        className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                    >
+                                        <option value="expense">Expense</option>
+                                        <option value="income">Income</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Date</label>
+                                    <input
+                                        type="date"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Amount ($)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={amount}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Category</label>
+                                    <select
+                                        value={showCustomCategory ? 'custom' : category}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'custom') {setShowCustomCategory(true);
+                                            setCategory('');
+                                        } else {
+                                            setShowCustomCategory(false);
+                                            setCategory(e.target.value);
+                                        }
+                                    }}
+                                    className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                >
+                                    <option value="">Select category</option>
+                                    {(type === 'expense' ? expenseCategories : incomeCategories).map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                    <option value="custom">+ Custom Category</option>
+                                </select>
+                            </div>
+
+                            {showCustomCategory && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Custom Category</label>
+                                    <input
+                                        type="text"
+                                        value={customCategory}
+                                        onChange={(e) => setCustomCategory(e.target.value)}
+                                        placeholder="Enter category name"
+                                        className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="md:col-span-2 lg:col-span-1">
+                                <label className="block text-sm font-medium mb-2">Description</label>
+                                <input
+                                    type="text"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Brief description"
+                                    className="w-full px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                onClick={addTransaction}
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                            >
+                                {editingId ? <><Save size={18} /> Update</> : <><PlusCircle size={18} /> Add</>}
+                            </button>
+                            {editingId && (
+                                <button
+                                    onClick={resetForm}
+                                    className="px-6 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                                >
+                                    <X size={18} /> Cancel
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Yearly Category Analysis */}
+                    <div className="bg-slate-800 rounded-lg p-6 mb-8 border border-slate-700">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold">Yearly Analysis - {selectedYear}</h2>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => {
+                                        setAnalysisType('expense');
+                                        setSelectedCategoryFilter('');
+                                    }}
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        analysisType === 'expense' 
+                                            ? 'bg-red-600 text-white' 
+                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                    }`}
+                                >
+                                    Expenses
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setAnalysisType('income');
+                                        setSelectedCategoryFilter('');
+                                    }}
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        analysisType === 'income' 
+                                            ? 'bg-green-600 text-white' 
+                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                    }`}
+                                >
+                                    Income
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2">Filter by Category</label>
+                            <select
+                                value={selectedCategoryFilter}
+                                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                                className="w-full md:w-64 px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none"
+                            >
+                                <option value="">All Categories</option>
+                                {Object.keys(analysisType === 'expense' ? yearlyCategoryBreakdown : yearlyIncomeCategoryBreakdown).sort().map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {selectedCategoryFilter ? (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-slate-900 rounded-lg">
+                                    <h3 className="text-xl font-semibold mb-2">{selectedCategoryFilter}</h3>
+                                    <p className={`text-3xl font-bold ${analysisType === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                        ${(analysisType === 'expense' 
+                                            ? yearlyCategoryBreakdown[selectedCategoryFilter]?.total 
+                                            : yearlyIncomeCategoryBreakdown[selectedCategoryFilter]?.total)?.toFixed(2) || '0.00'}
+                                    </p>
+                                    <p className="text-sm text-slate-400 mt-1">
+                                        {(analysisType === 'expense' 
+                                            ? yearlyCategoryBreakdown[selectedCategoryFilter]?.transactions.length 
+                                            : yearlyIncomeCategoryBreakdown[selectedCategoryFilter]?.transactions.length) || 0} transactions
+                                    </p>
+                                </div>
+
+                                {/* Breakdown by Description */}
+                                {(() => {
+                                    const descriptionTotals = {};
+                                    const currentBreakdown = analysisType === 'expense' ? yearlyCategoryBreakdown : yearlyIncomeCategoryBreakdown;
+                                    currentBreakdown[selectedCategoryFilter]?.transactions.forEach(t => {
+                                        if (!descriptionTotals[t.description]) {
+                                            descriptionTotals[t.description] = 0;
+                                        }
+                                        descriptionTotals[t.description] += t.amount;
+                                    });
+                                    
+                                    return Object.keys(descriptionTotals).length > 1 && (
+                                        <div className="p-4 bg-slate-900 rounded-lg">
+                                            <h4 className="font-semibold text-slate-300 mb-3">Breakdown by Entry:</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                {Object.entries(descriptionTotals)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .map(([desc, total]) => (
+                                                        <div key={desc} className="p-3 bg-slate-800 rounded-lg">
+                                                            <div className="font-medium text-sm mb-1">{desc}</div>
+                                                            <div className={`text-xl font-bold ${analysisType === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                                                ${total.toFixed(2)}
+                                                            </div>
+                                                            <div className="text-xs text-slate-400 mt-1">
+                                                                {currentBreakdown[selectedCategoryFilter].transactions.filter(t => t.description === desc).length} entries
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                <div className="space-y-2">
+                                    <h4 className="font-semibold text-slate-300">All Transactions:</h4>
+                                    {(analysisType === 'expense' 
+                                        ? yearlyCategoryBreakdown[selectedCategoryFilter]?.transactions 
+                                        : yearlyIncomeCategoryBreakdown[selectedCategoryFilter]?.transactions)
+                                        ?.sort((a, b) => new Date(b.date) - new Date(a.date))
+                                        .map(t => (
+                                            <div
+                                                key={t.id}
+                                                className="flex justify-between items-center p-3 bg-slate-900 rounded-lg hover:bg-slate-700 transition-colors"
+                                            >
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-medium">{t.description}</span>
+                                                        <span className="text-slate-400 text-sm">
+                                                            {getMonthName(t.month)} {t.year}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-sm text-slate-400 mt-1">{t.date}</div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span className={`text-lg font-bold ${analysisType === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                                        ${t.amount.toFixed(2)}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => editTransaction(t)}
+                                                        className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteTransaction(t.id)}
+                                                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-400"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {Object.entries(analysisType === 'expense' ? yearlyCategoryBreakdown : yearlyIncomeCategoryBreakdown)
+                                    .sort((a, b) => b[1].total - a[1].total)
+                                    .map(([category, data]) => (
+                                        <div
+                                            key={category}
+                                            onClick={() => setSelectedCategoryFilter(category)}
+                                            className="p-4 bg-slate-900 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer"
+                                        >
+                                            <h4 className="font-semibold mb-1 text-slate-300">{category}</h4>
+                                            <p className={`text-2xl font-bold ${analysisType === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                                ${data.total.toFixed(2)}
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1">{data.transactions.length} transactions</p>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Monthly Breakdown */}
+                    <div className="space-y-6">
+                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                            <Calendar size={24} />
+                            Monthly Breakdown - {selectedYear}
+                        </h2>
+
+                        {filteredMonthlyData.length === 0 ? (
+                            <div className="bg-slate-800 rounded-lg p-8 text-center border border-slate-700">
+                                <p className="text-slate-400">No transactions for {selectedYear}. {selectedYear === currentYear ? 'Add your first transaction above!' : 'Select a different year or add transactions.'}</p>
+                            </div>
+                        ) : (
+                            filteredMonthlyData.slice().reverse().map((data, idx) => {
+                                const net = data.income - data.expenses;
+                                const categoryBreakdown = getCategoryBreakdown(data);
+                                const monthKey = `${data.year}-${data.month}`;
+                                const isExpanded = expandedMonths[monthKey];
+                                
+                                return (
+                                    <div key={idx} className="bg-slate-800 rounded-lg border border-slate-700">
+                                        <div 
+                                            className="p-6 cursor-pointer hover:bg-slate-750 transition-colors"
+                                            onClick={() => toggleMonth(monthKey)}
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-3">
+                                                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                                    <h3 className="text-xl font-bold">
+                                                        {getMonthName(data.month)} {data.year}
+                                                    </h3>
+                                                </div>
+                                                <div className="flex gap-6 text-sm">
+                                                    <span className="text-green-400">Income: ${data.income.toFixed(2)}</span>
+                                                    <span className="text-red-400">Expenses: ${data.expenses.toFixed(2)}</span>
+                                                    <span className={net >= 0 ? 'text-blue-400' : 'text-red-400'}>
+                                                        Net: ${net.toFixed(2)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {isExpanded && (
+                                            <div className="px-6 pb-6">
+                                                {/* Category Breakdown */}
+                                                {Object.keys(categoryBreakdown).length > 0 && (
+                                                    <div className="mb-4 p-4 bg-slate-900 rounded-lg">
+                                                        <h4 className="text-sm font-semibold mb-2 text-slate-300">Expense Breakdown:</h4>
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                                                            {Object.entries(categoryBreakdown).map(([cat, amt]) => (
+                                                                <div key={cat} className="text-slate-400">
+                                                                    {cat}: <span className="text-white">${amt.toFixed(2)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Transactions List */}
+                                                <div className="space-y-2">
+                                                    {data.transactions.map(t => (
+                                                        <div
+                                                            key={t.id}
+                                                            className="flex justify-between items-center p-3 bg-slate-900 rounded-lg hover:bg-slate-700 transition-colors"
+                                                        >
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                                        t.type === 'income' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                                                    }`}>
+                                                                        {t.type}
+                                                                    </span>
+                                                                    <span className="font-medium">{t.description}</span>
+                                                                    <span className="text-slate-400 text-sm">({t.category})</span>
+                                                                </div>
+                                                                <div className="text-sm text-slate-400 mt-1">{t.date}</div>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className={`text-lg font-bold ${
+                                                                    t.type === 'income' ? 'text-green-400' : 'text-red-400'
+                                                                }`}>
+                                                                    {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => editTransaction(t)}
+                                                                    className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                                                                >
+                                                                    <Edit2 size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => deleteTransaction(t.id)}
+                                                                    className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-400"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    ReactDOM.render(<FinanceTracker />, document.getElementById('root'));
+</script>
